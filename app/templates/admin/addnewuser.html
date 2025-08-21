@@ -24,22 +24,34 @@ block content %}
       </div>
       <div class="mb-3">
         {{ form.first_name.label(class="form-label") }} {{
-        form.first_name(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.last_name.label(class="form-label") }} {{
-        form.last_name(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.role.label(class="form-label") }} {{
-        form.role(class="form-select" + (" is-invalid" if form.role.errors else
-        "")) }} {% for error in form.role.errors %}
+        form.first_name(class="form-control" + (" is-invalid" if
+        form.first_name.errors else "")) }} {% for error in
+        form.first_name.errors %}
         <div class="invalid-feedback">{{ error }}</div>
         {% endfor %}
       </div>
       <div class="mb-3">
+        {{ form.last_name.label(class="form-label") }} {{
+        form.last_name(class="form-control" + (" is-invalid" if
+        form.last_name.errors else "")) }} {% for error in
+        form.last_name.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.role.label(class="form-label") }} {{
+        form.role(class="form-select" + (" is-invalid" if form.role.errors else
+        ""), id="roleSelect") }} {% for error in form.role.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="mb-3" id="managerField" style="display: none;">
         {{ form.manager_id.label(class="form-label") }} {{
-        form.manager_id(class="form-control") }}
+        form.manager_id(class="form-select" + (" is-invalid" if
+        form.manager_id.errors else "")) }} {% for error in
+        form.manager_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.is_active.label(class="form-label") }} {{
@@ -70,4 +82,22 @@ block content %}
     </form>
   </div>
 </div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const roleSelect = document.getElementById("roleSelect");
+    const managerField = document.getElementById("managerField");
+
+    function toggleManagerField() {
+      if (roleSelect.value === "employee") {
+        managerField.style.display = "block";
+      } else {
+        managerField.style.display = "none";
+      }
+    }
+
+    roleSelect.addEventListener("change", toggleManagerField);
+    toggleManagerField(); // Initial call
+  });
+</script>
 {% endblock %}
