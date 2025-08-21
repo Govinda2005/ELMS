@@ -1,0 +1,25 @@
+{% extends "layout/base.html" %}
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="container text-center my-5">
+    <div class="alert alert-danger p-4" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Access Denied (403)</h4>
+        <p>You do not have the necessary permissions to access this page.</p>
+        <hr>
+        <p class="mb-0">Please contact your administrator if you believe this is an error.</p>
+    </div>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
+        <i class="fas fa-home me-2"></i>Go to Homepage
+    </a>
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary mt-3">Go to Your Dashboard</a>
+        {% elif current_user.is_manager() %}
+            <a href="{{ url_for('manager.dashboard') }}" class="btn btn-secondary mt-3">Go to Your Dashboard</a>
+        {% elif current_user.is_employee() %}
+            <a href="{{ url_for('employee.dashboard') }}" class="btn btn-secondary mt-3">Go to Your Dashboard</a>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
