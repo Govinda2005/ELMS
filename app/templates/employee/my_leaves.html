@@ -1,0 +1,113 @@
+{% extends "layout/base.html" %}
+{% block title %}My Leave Requests - ELMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-list me-2"></i>My Leave History</h1>
+    <a href="{{ url_for('employee.apply_leave') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i> Apply for Leave
+    </a>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('employee.my_leaves') }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Filter by Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('employee.my_leaves') }}" class="btn btn-outline-secondary w-100">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Leave Requests Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">My Requests</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Applied On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in leave_requests.items %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-info">{{ request.leave_type.value.title() }}</span>
+                        </td>
+                        <td>{{ request.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ request.end_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ request.duration }} days</td>
+                        <td>
+                            {% if request.status.value == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                            {% elif request.status.value == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif request.status.value == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% elif request.status.value == 'cancelled' %}
+                            <span class="badge bg-secondary">Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-dark">{{ request.status.value.title() }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if request.can_be_edited %}
+                            <a href="{{ url_for('employee.edit_leave', request_id=request.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% endif %}
+                            {% if request.can_be_cancelled %}
+                            <a href="{{ url_for('employee.cancel_leave', request_id=request.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this leave request?');" title="Cancel">
+                                <i class="fas fa-times-circle"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                            <p class="mb-0">You have not made any leave requests yet.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if leave_requests.pages > 1 %}
+        <nav aria-label="Leave request pagination">
+            <ul class="pagination justify-content-center mt-4">
+                {{- macros.pagination_widget(leave_requests, 'employee.my_leaves', status=status_filter) -}}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

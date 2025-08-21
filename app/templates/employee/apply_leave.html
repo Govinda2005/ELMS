@@ -1,0 +1,170 @@
+{% extends "layout/base.html" %} {% block title %}Apply Leave - ELMS{% endblock
+%} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">
+          <i class="fas fa-plus-circle me-2"></i>
+          Apply for Leave
+        </h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              {{ form.leave_type.label(class="form-label") }} {{
+              form.leave_type(class="form-select" + (" is-invalid" if
+              form.leave_type.errors else "")) }} {% if form.leave_type.errors
+              %}
+              <div class="invalid-feedback">
+                {% for error in form.leave_type.errors %} {{ error }} {% endfor
+                %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              {{ form.start_date.label(class="form-label") }} {{
+              form.start_date(class="form-control" + (" is-invalid" if
+              form.start_date.errors else ""), type="date") }} {% if
+              form.start_date.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.start_date.errors %} {{ error }} {% endfor
+                %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+              {{ form.end_date.label(class="form-label") }} {{
+              form.end_date(class="form-control" + (" is-invalid" if
+              form.end_date.errors else ""), type="date") }} {% if
+              form.end_date.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.end_date.errors %} {{ error }} {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            {{ form.reason.label(class="form-label") }} {{
+            form.reason(class="form-control" + (" is-invalid" if
+            form.reason.errors else ""), rows="4", placeholder="Please provide a
+            reason for your leave request...") }} {% if form.reason.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.reason.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+            <div class="form-text">
+              Optional: Provide additional details about your leave request.
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a
+              href="{{ url_for('employee.dashboard') }}"
+              class="btn btn-secondary"
+            >
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Dashboard
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane me-2"></i>
+              Submit Request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Leave Policies Card -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          Leave Policies
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Leave Types:</h6>
+            <ul class="list-unstyled">
+              <li>
+                <span class="badge bg-info me-2">Sick</span> Medical leave
+              </li>
+              <li>
+                <span class="badge bg-success me-2">Vacation</span> Annual leave
+              </li>
+              <li>
+                <span class="badge bg-warning me-2">Personal</span> Personal
+                time off
+              </li>
+              <li>
+                <span class="badge bg-primary me-2">Maternity</span> Maternity
+                leave
+              </li>
+              <li>
+                <span class="badge bg-secondary me-2">Paternity</span> Paternity
+                leave
+              </li>
+              <li>
+                <span class="badge bg-danger me-2">Emergency</span> Emergency
+                leave
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6>Important Notes:</h6>
+            <ul class="list-unstyled">
+              <li>
+                <i class="fas fa-check text-success me-2"></i> Leave requests
+                must be submitted in advance
+              </li>
+              <li>
+                <i class="fas fa-check text-success me-2"></i> Manager approval
+                required
+              </li>
+              <li>
+                <i class="fas fa-check text-success me-2"></i> Can edit pending
+                requests
+              </li>
+              <li>
+                <i class="fas fa-check text-success me-2"></i> Can cancel
+                approved requests before start date
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set minimum date to today
+    const today = new Date().toISOString().split("T")[0];
+    document
+      .querySelector('input[name="start_date"]')
+      .setAttribute("min", today);
+    document.querySelector('input[name="end_date"]').setAttribute("min", today);
+
+    // Update end date minimum when start date changes
+    document
+      .querySelector('input[name="start_date"]')
+      .addEventListener("change", function () {
+        const startDate = this.value;
+        document
+          .querySelector('input[name="end_date"]')
+          .setAttribute("min", startDate);
+      });
+  });
+</script>
+{% endblock %}
