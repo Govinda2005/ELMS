@@ -1,0 +1,45 @@
+<nav
+  class="sidebar position-fixed d-none d-md-block"
+  style="width: 250px; z-index: 1000"
+>
+  <div class="p-3">
+    <h5 class="text-white mb-4">
+      <i class="fas fa-calendar-check me-2"></i>
+      ELMS
+    </h5>
+    <div class="text-white-50 small mb-3">
+      Welcome, {{ current_user.first_name }}!<br />
+      <span class="badge bg-light text-dark"
+        >{{ current_user.role.value.title() }}</span
+      >
+    </div>
+    <ul class="nav nav-pills flex-column">
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.endpoint and 'dashboard' in request.endpoint %}active{% endif %}"
+          href="{{ url_for('admin.dashboard') }}"
+        >
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}"
+          href="{{ url_for('admin.audit_logs') }}"
+        >
+          <i class="fas fa-history me-2"></i> Audit Logs
+        </a>
+      </li>
+      <li class="nav-item mt-3">
+        <a class="nav-link" href="{{ url_for('main.profile') }}">
+          <i class="fas fa-user me-2"></i> Profile
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
