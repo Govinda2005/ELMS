@@ -1,0 +1,15 @@
+{% extends "layout/base.html" %} {% block title %}Profile{% endblock %} {% block
+content %}
+<div class="card mx-auto" style="max-width: 500px">
+  <div class="card-header">
+    <h4 class="mb-0"><i class="fas fa-user me-2"></i>Profile</h4>
+  </div>
+  <div class="card-body">
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Name:</strong> {{ user.full_name }}</p>
+    <p><strong>Role:</strong> {{ user.role.value.title() }}</p>
+    <!-- Add more fields as needed -->
+  </div>
+</div>
+{% endblock %}
