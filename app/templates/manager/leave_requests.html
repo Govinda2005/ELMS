@@ -11,6 +11,7 @@
       <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
       <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved</option>
       <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+      <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
     </select>
   </div>
   <div class="col-md-3">
@@ -58,6 +59,7 @@
                 {% if req.status.value == 'pending' %}bg-warning text-dark
                 {% elif req.status.value == 'approved' %}bg-success
                 {% elif req.status.value == 'rejected' %}bg-danger
+                {% else %}bg-secondary
                 {% endif %}">
                 {{ req.status.value.title() }}
               </span>
