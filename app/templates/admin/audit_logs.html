@@ -1,0 +1,94 @@
+{% extends "layout/base.html" %} {% block title %}Audit Logs{% endblock %} {%
+block content %}
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Audit Logs</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Old Values</th>
+            <th>New Values</th>
+            <th>IP Address</th>
+            <th>User Agent</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs.items %}
+          <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.user.full_name if log.user else 'System' }}</td>
+            <td>{{ log.action }}</td>
+            <td>
+              {{ log.entity_type or '' }} {% if log.entity_id %}#{{
+              log.entity_id }}{% endif %}
+            </td>
+            <td>
+              <pre class="mb-0">{{ log.old_values or '' }}</pre>
+            </td>
+            <td>
+              <pre class="mb-0">{{ log.new_values or '' }}</pre>
+            </td>
+            <td>{{ log.ip_address }}</td>
+            <td>
+              <span title="{{ log.user_agent }}"
+                >{{ log.user_agent[:20] }}{% if log.user_agent|length > 20
+                %}...{% endif %}</span
+              >
+            </td>
+            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center text-muted">
+              No audit logs found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Pagination -->
+    <nav aria-label="Audit log pagination">
+      <ul class="pagination justify-content-center">
+        {% if logs.has_prev %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="{{ url_for('admin.audit_logs', page=logs.prev_num) }}"
+            >Previous</a
+          >
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Previous</span>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+          <span class="page-link">{{ logs.page }}</span>
+        </li>
+        {% if logs.has_next %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="{{ url_for('admin.audit_logs', page=logs.next_num) }}"
+            >Next</a
+          >
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Next</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endblock %}
