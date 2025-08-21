@@ -1,0 +1,106 @@
+{% extends "layout/base.html" %}
+{% block title %}Leave Requests{% endblock %}
+{% block content %}
+<h1 class="mb-4"><i class="fas fa-clipboard-list me-2"></i>Leave Requests</h1>
+
+<!-- Filters -->
+<form method="get" class="row g-3 mb-3">
+  <div class="col-md-3">
+    <select name="status" class="form-select">
+      <option value="">All Statuses</option>
+      <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+      <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved</option>
+      <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select name="employee" class="form-select">
+      <option value="">All Employees</option>
+      {% for emp in employees %}
+        <option value="{{ emp.id }}" {% if employee_filter == emp.id %}selected{% endif %}>
+          {{ emp.full_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
+
+<!-- Requests Table -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+            <th>Applied On</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests.items %}
+          <tr>
+            <td>{{ req.id }}</td>
+            <td>{{ req.employee.full_name if req.employee else 'N/A' }}</td>
+            <td>{{ req.leave_type.value if req.leave_type else 'N/A' }}</td>
+            <td>{{ req.start_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ req.end_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <span class="badge 
+                {% if req.status.value == 'pending' %}bg-warning text-dark
+                {% elif req.status.value == 'approved' %}bg-success
+                {% elif req.status.value == 'rejected' %}bg-danger
+                {% endif %}">
+                {{ req.status.value.title() }}
+              </span>
+            </td>
+            <td>{{ req.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+              {% if req.status.value == 'pending' %}
+                <a href="{{ url_for('manager.review_request', request_id=req.id) }}" class="btn btn-sm btn-primary">
+                  Review
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" class="text-center text-muted">No leave requests found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Pagination -->
+    <nav aria-label="Leave request pagination">
+      <ul class="pagination justify-content-center">
+        {% if requests.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('manager.leave_requests', page=requests.prev_num, status=status_filter, employee=employee_filter) }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ requests.page }}</span></li>
+        {% if requests.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('manager.leave_requests', page=requests.next_num, status=status_filter, employee=employee_filter) }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "layout/base.html" %} {% block title %}Manager Dashboard{% endblock
+%} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="fas fa-user-tie me-2"></i>Manager Dashboard</h1>
+</div>
+
+<!-- Team Stats -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Team Members</h5>
+        <p class="display-6">{{ team_members|length }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Pending Requests</h5>
+        <p class="display-6">{{ pending_requests }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Approved Requests</h5>
+        <p class="display-6">{{ approved_requests }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Leave Requests -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0">
+      <i class="fas fa-clipboard-list me-2"></i>Recent Leave Requests for Review
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+            <th>Applied On</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in recent_requests %}
+          <tr>
+            <td>{{ req.id }}</td>
+            <td>{{ req.employee.full_name if req.employee else 'N/A' }}</td>
+            <td>{{ req.leave_type.value if req.leave_type else 'N/A' }}</td>
+            <td>{{ req.start_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ req.end_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <span class="badge bg-warning text-dark"
+                >{{ req.status.value.title() }}</span
+              >
+            </td>
+            <td>{{ req.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <a
+                href="{{ url_for('manager.leave_requests', request_id=req.id) }}"
+                class="btn btn-sm btn-primary"
+              >
+                Review
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" class="text-center text-muted">
+              No recent leave requests.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
