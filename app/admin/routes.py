@@ -31,8 +31,8 @@ def dashboard():
     return render_template('admin/dashboard.html', users=users, form=form)
 
 @admin_bp.route('/add_user', methods=['GET', 'POST'])
-#@login_required
-#@admin_required
+@login_required
+@admin_required
 def add_user():
     form = CreateUserForm()
     if form.validate_on_submit():
@@ -139,13 +139,20 @@ def delete_user(user_id):
         flash('Cannot delete user with pending leave requests', 'danger')
         return redirect(url_for('admin.manage_users'))
     
-    log_activity('user_deleted', 'user', user.id, 
-                old_values={'username': user.username, 'role': user.role.value})
-    
-    db.session.delete(user)
+    managed_users = User.query.filter_by(manager_id=user.id).count()
+    if managed_users > 0:
+        flash(f'Cannot deactivate manager "{user.full_name}". Please reassign their {managed_users} employees first.', 'danger')
+        return redirect(url_for('admin.manage_users'))
+
+    old_values = {'is_active': user.is_active}
+    user.is_active = False
+    new_values = {'is_active': user.is_active}
+
+    log_activity('user_deactivated', 'user', user.id, old_values, new_values)
+
     db.session.commit()
     
-    flash('User deleted successfully', 'success')
+    flash('User deactivated successfully', 'success')
     return redirect(url_for('admin.manage_users'))
 
 
@@ -190,18 +197,24 @@ def reports():
     return render_template('admin/reports.html', form=form)
 
 
-def generate_monthly_report(month, year, format_type):
+def generate_monthly_report(month, year, format_type, manager_id=None):
     # Query leave requests for the specified month and year
     start_date = datetime(year, month, 1)
     if month == 12:
         end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
     else:
         end_date = datetime(year, month + 1, 1) - timedelta(days=1)
-    
-    leaves = LeaveRequest.query.filter(
+
+    query = LeaveRequest.query.filter(
         and_(LeaveRequest.start_date >= start_date.date(),
              LeaveRequest.start_date <= end_date.date())
-    ).all()
+    )
+
+    if manager_id:
+        employee_ids = [e.id for e in User.query.get(manager_id).employees]
+        query = query.filter(LeaveRequest.employee_id.in_(employee_ids))
+
+    leaves = query.all()
     
     data = []
     for leave in leaves:
@@ -339,4 +352,3 @@ def generate_pdf_response(data, title):
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename={title.replace(" ", "_").lower()}.pdf'
     return response
-
