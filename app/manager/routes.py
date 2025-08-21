@@ -56,10 +56,23 @@ def dashboard():
                          total_requests=total_requests,
                          recent_requests=recent_requests)
 
-@manager_bp.route('/leave_requests')
+@manager_bp.route('/leave_requests', methods=['GET', 'POST'])
 @login_required
 @manager_or_admin_required
 def leave_requests():
+    # Handle POST request for Accept/Reject actions
+    if request.method == 'POST':
+        req_id = request.form.get('request_id')
+        action = request.form.get('action')
+        leave_request = LeaveRequest.query.get(req_id)
+        if leave_request:
+            if action == 'accept':
+                leave_request.status = LeaveStatus.APPROVED
+            elif action == 'reject':
+                leave_request.status = LeaveStatus.REJECTED
+            db.session.commit()      
+        return redirect(url_for('manager.leave_requests'))
+    
     page = request.args.get('page', 1, type=int)
     per_page = 10
     
@@ -67,7 +80,6 @@ def leave_requests():
     status_filter = request.args.get('status', '')
     employee_filter = request.args.get('employee', '', type=int)
     
-    # Base query depending on user role
     if current_user.is_manager():
         query = LeaveRequest.query.join(User, LeaveRequest.employee_id == User.id).filter(User.manager_id == current_user.id)
     else:  # Admin can see all requests
@@ -109,39 +121,43 @@ def leave_requests():
 def review_request(request_id):
     leave_request = LeaveRequest.query.get_or_404(request_id)
     
-    # Check if manager can approve this request
     if not current_user.can_approve_leave(leave_request.employee_id):
         flash('You do not have permission to review this request', 'danger')
         return redirect(url_for('manager.leave_requests'))
     
-    # Check if request is still pending
+    
     if leave_request.status != LeaveStatus.PENDING:
         flash('This request has already been processed', 'warning')
         return redirect(url_for('manager.leave_requests'))
     
     form = ApprovalForm()
     
-    if form.validate_on_submit():
-        old_status = leave_request.status.value
-        
-        if form.action.data == 'approve':
-            leave_request.status = LeaveStatus.APPROVED
-        else:
-            leave_request.status = LeaveStatus.REJECTED
+    if request.method == 'POST' and form.validate_on_submit():
+        action = request.form.get('action')
+
+        if action in ['approve', 'reject']:
+            old_status = leave_request.status.value
             
-        leave_request.approved_by = current_user.id
-        leave_request.approval_date = datetime.utcnow()
-        leave_request.manager_comments = form.comments.data
-        leave_request.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        
-        log_activity(f'leave_request_{form.action.data}d', 'leave_request', leave_request.id,
-                    old_values={'status': old_status},
-                    new_values={'status': leave_request.status.value, 'comments': form.comments.data})
-        
-        flash(f'Leave request {form.action.data}d successfully', 'success')
-        return redirect(url_for('manager.leave_requests'))
+            if action == 'approve':
+                leave_request.status = LeaveStatus.APPROVED
+            else:
+                leave_request.status = LeaveStatus.REJECTED
+                
+            leave_request.approved_by = current_user.id
+            leave_request.approval_date = datetime.utcnow()
+            leave_request.manager_comments = form.comments.data
+            leave_request.updated_at = datetime.utcnow()
+            
+            db.session.commit()
+            
+            log_activity(f'leave_request_{action}d', 'leave_request', leave_request.id,
+                        old_values={'status': old_status},
+                        new_values={'status': leave_request.status.value, 'comments': form.comments.data})
+            
+            flash(f'Leave request {action}d successfully', 'success')
+            return redirect(url_for('manager.leave_requests'))
+        else:
+            flash('Invalid action performed.', 'danger')
     
     return render_template('manager/review_request.html', 
                          form=form, 
@@ -153,9 +169,8 @@ def review_request(request_id):
 def team_reports():
     form = ReportForm()
     
-    # Limit report options for managers
-    if current_user.is_manager():
-        form.report_type.choices = [('monthly', 'Monthly Report'), ('team', 'Team Report')]
+
+    form.report_type.choices = [('monthly', 'Monthly Report'), ('team', 'Team Report')]
     
     if form.validate_on_submit():
         report_type = form.report_type.data
@@ -174,15 +189,14 @@ def team_reports():
 
 def generate_manager_monthly_report(month, year, format_type):
     from app.admin.routes import generate_monthly_report
-    # For managers, filter by their team
+    manager_id = None
     if current_user.is_manager():
-        # This would need to be implemented to filter by manager's team
-        pass
-    return generate_monthly_report(month, year, format_type)
+        manager_id = current_user.id
+    return generate_monthly_report(month, year, format_type, manager_id=manager_id)
 
 def generate_manager_team_report(format_type):
     from app.admin.routes import generate_team_report
-    # Generate report for manager's team only
+    
     manager_id = current_user.id if current_user.is_manager() else None
     return generate_team_report(manager_id, format_type)
 
@@ -192,7 +206,7 @@ def generate_manager_team_report(format_type):
 def team_members():
     if current_user.is_manager():
         members = current_user.employees
-    else:  # Admin can see all employees
+    else:  
         members = User.query.filter_by(role=UserRole.EMPLOYEE).all()
     
     log_activity('team_members_viewed')
