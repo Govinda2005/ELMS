@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, DateField, PasswordField, BooleanField, IntegerField,SubmitField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from wtforms.widgets import TextArea
 from datetime import date, datetime
 from app.models import User, UserRole, LeaveType
@@ -93,20 +93,17 @@ class ReportForm(FlaskForm):
         ('team', 'Team Report'),
         ('user', 'User Report')
     ], validators=[DataRequired()])
-    month = SelectField('Month', choices=[(str(i), datetime(2000, i, 1).strftime('%B')) for i in range(1, 13)])
-    year = SelectField('Year', choices=[(str(year), str(year)) for year in range(2020, 2030)])
-    team_manager = SelectField('Team Manager', coerce=int)
-    employee = SelectField('Employee', coerce=int)
+    month = SelectField('Month', choices=[(str(i), datetime(2000, i, 1).strftime('%B')) for i in range(1, 13)],
+                        default=lambda: str(datetime.now().month))
+    year = SelectField('Year', choices=[(str(year), str(year)) for year in range(2020, 2030)],
+                       default=lambda: str(datetime.now().year))
+    team_manager = SelectField('Team Manager', coerce=int, validators=[Optional()])
+    employee = SelectField('Employee', coerce=int, validators=[Optional()])
     format = SelectField('Format', choices=[('pdf', 'PDF'), ('csv', 'CSV')], validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
         super(ReportForm, self).__init__(*args, **kwargs)
-        # Set default values
-        current_date = datetime.now()
-        self.month.data = str(current_date.month)
-        self.year.data = str(current_date.year)
         
-        # Populate team manager choices
         managers = User.query.filter_by(role=UserRole.MANAGER).all()
         self.team_manager.choices = [(0, 'All Teams')] + [(m.id, m.full_name) for m in managers]
         
@@ -118,17 +115,29 @@ class ReportForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=64)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    first_name = StringField('First Name')
-    last_name = StringField('Last Name')
-    role = SelectField('Role', choices=[
-        ('admin', 'Admin'),
-        ('manager', 'Manager'),
-        ('employee', 'Employee')
-    ], validators=[DataRequired()])
-    manager_id = IntegerField('Manager ID')  # You can use a SelectField if you want to show manager names
+    first_name = StringField('First Name', validators=[DataRequired(), Length(max=50)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(max=50)])
+    role = SelectField('Role', choices=[(role.value, role.value.title()) for role in UserRole], validators=[DataRequired()])
+    manager_id = SelectField('Manager', coerce=int, validators=[Optional()])
     is_active = BooleanField('Active', default=True)
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField('Confirm Password', validators=[
         DataRequired(), EqualTo('password', message='Passwords must match.')
     ])
     submit = SubmitField('Create User')
+
+    def __init__(self, *args, **kwargs):
+        super(CreateUserForm, self).__init__(*args, **kwargs)
+        # Populate manager choices with active managers
+        managers = User.query.filter_by(role=UserRole.MANAGER, is_active=True).all()
+        self.manager_id.choices = [(0, 'No Manager')] + [(m.id, m.full_name) for m in managers]
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('This username is already taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('This email address is already registered. Please choose a different one.')
