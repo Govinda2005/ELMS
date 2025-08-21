@@ -3,34 +3,54 @@ block content %}
 <h1 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Team Reports</h1>
 <div class="card">
   <div class="card-body">
-    <form method="post">
+    <form method="post" id="reportForm">
       {{ form.hidden_tag() }}
-      <div class="row mb-3">
-        <div class="col-md-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
           {{ form.report_type.label(class="form-label") }} {{
-          form.report_type(class="form-select") }}
+          form.report_type(class="form-select", id="reportType") }}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2" id="monthField" style="display: none">
           {{ form.month.label(class="form-label") }} {{
           form.month(class="form-select") }}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2" id="yearField" style="display: none">
           {{ form.year.label(class="form-label") }} {{
           form.year(class="form-select") }}
         </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-4">
+        <div class="col-md-2">
           {{ form.format.label(class="form-label") }} {{
           form.format(class="form-select") }}
         </div>
-        <div class="col-md-8 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-download me-1"></i> Generate Report
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-download me-1"></i> Generate
           </button>
         </div>
       </div>
     </form>
   </div>
 </div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const reportTypeSelect = document.getElementById("reportType");
+    const monthField = document.getElementById("monthField");
+    const yearField = document.getElementById("yearField");
+
+    function toggleReportFields() {
+      const isMonthly = reportTypeSelect.value === "monthly";
+
+      monthField.style.display = isMonthly ? "block" : "none";
+      yearField.style.display = isMonthly ? "block" : "none";
+
+      monthField.querySelector("select").disabled = !isMonthly;
+      yearField.querySelector("select").disabled = !isMonthly;
+    }
+
+    toggleReportFields();
+    reportTypeSelect.addEventListener("change", toggleReportFields);
+  });
+</script>
 {% endblock %}
+ endblock %}
