@@ -8,7 +8,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://username:password@localhost/elms_db'
+        'postgresql://ELMS:Govinda_2005@localhost/elms_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Pagination
@@ -26,18 +26,20 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'postgresql://username:password@localhost/elms_dev'
+                'postgresql://ELMS:Govinda_2005@localhost/elms_db'
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-        'postgresql://username:password@localhost/elms_test'
+                'postgresql://ELMS:Govinda_2005@localhost/elms_db'
+
     WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://username:password@localhost/elms_db'
+                'postgresql://ELMS:Govinda_2005@localhost/elms_db'
+
 
 config = {
     'development': DevelopmentConfig,
