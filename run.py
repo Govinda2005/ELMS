@@ -67,6 +67,7 @@ def init_db():
         ('nani', 'nani@gmail.com', 'nani', 'Employee', manager1.id),
         ('ramesh', 'ramesh@gmail.com', 'ramesh', 'Employee', manager2.id),
         ('tharun', 'tharun@gmail.com', 'tharun', 'Employee', manager2.id),
+        ('ganesh','ganesh@gmail.com','ganmesh','Employee',manager2.id)
     ]
     
     for username, email, first_name, last_name, manager_id in employees:
@@ -89,6 +90,7 @@ def init_db():
     employee2= User.query.filter_by(username='nani').first()
     employee3= User.query.filter_by(username='ramesh').first()
     employee4 = User.query.filter_by(username='tharun').first()
+    employee5 = User.query.filter_by(username='ganesh').first()
 
 
     
@@ -96,7 +98,8 @@ def init_db():
         (employee1.id, LeaveType.VACATION, date(2025, 9, 1), date(2025, 9, 5), 'Family vacation'),
         (employee2.id, LeaveType.SICK, date(2025, 8, 15), date(2025, 8, 16), 'Medical appointment'),
         (employee3.id, LeaveType.PERSONAL, date(2025, 8, 20), date(2025, 8, 20), 'Personal matters'),
-        (employee4.id,LeaveType.PERSONAL,date(2025,8,27),date(2025,8,27),'My birthaday')    ]
+        (employee4.id, LeaveType.PERSONAL,date(2025,8,27),date(2025,8,27),'My birthaday'),
+        (employee5.id, LeaveType.PERSONAL,date(2025,9,27),date(2025,10,7),'personal matters'),    ]
     
     for emp_id, leave_type, start_date, end_date, reason in sample_leaves:
         leave_request = LeaveRequest(
@@ -120,6 +123,7 @@ def init_db():
     print("Employee 2: username='nani', password='employee123'")
     print("Employee 3: username='ramesh', password='employee123'")
     print("Employee 4: username='tharun', password='employee123'")
+    print("Employee 5: username='ganesh', password='employee123'")
 
 @cli.command("create-admin")
 def create_admin():
