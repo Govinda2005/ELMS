@@ -30,19 +30,19 @@ def init_db():
     # Create admin user
     admin = User(
         username='admin',
-        email='admin@elms.com',
-        first_name='System',
-        last_name='Administrator',
+        email='admin@gmail.com',
+        first_name='admin',
+        last_name='main',
         role=UserRole.ADMIN
     )
-    admin.set_password('admin123')
+    admin.set_password('admin@123')
     db.session.add(admin)
     
     # Create manager users
     manager1 = User(
-        username='manager1',
-        email='manager1@elms.com',
-        first_name='John',
+        username='dayamanager',
+        email='daya@gmail.com',
+        first_name='dayakar',
         last_name='Manager',
         role=UserRole.MANAGER
     )
@@ -50,9 +50,9 @@ def init_db():
     db.session.add(manager1)
     
     manager2 = User(
-        username='manager2',
-        email='manager2@elms.com',
-        first_name='Jane',
+        username='vijaymanager',
+        email='vijay@gmail.com',
+        first_name='vijay',
         last_name='Manager',
         role=UserRole.MANAGER
     )
@@ -64,10 +64,10 @@ def init_db():
     
     # Create employee users
     employees = [
-        ('employee1', 'employee1@elms.com', 'Alice', 'Employee', manager1.id),
-        ('employee2', 'employee2@elms.com', 'Bob', 'Employee', manager1.id),
-        ('employee3', 'employee3@elms.com', 'Charlie', 'Employee', manager2.id),
-        ('employee4', 'employee4@elms.com', 'Diana', 'Employee', manager2.id),
+        ('govi', 'govi@gmail.com', 'govi', 'Employee', manager1.id),
+        ('nani', 'nani@gmail.com', 'nani', 'Employee', manager1.id),
+        ('ramesh', 'ramesh@gmail.com', 'ramesh', 'Employee', manager2.id),
+        ('tharun', 'tharun@gmail.com', 'tharun', 'Employee', manager2.id),
     ]
     
     for username, email, first_name, last_name, manager_id in employees:
@@ -110,13 +110,13 @@ def init_db():
     
     print("Database initialized with sample data!")
     print("\nSample Users:")
-    print("Admin: username='admin', password='admin123'")
-    print("Manager 1: username='manager1', password='manager123'")
-    print("Manager 2: username='manager2', password='manager123'")
-    print("Employee 1: username='employee1', password='employee123'")
-    print("Employee 2: username='employee2', password='employee123'")
-    print("Employee 3: username='employee3', password='employee123'")
-    print("Employee 4: username='employee4', password='employee123'")
+    print("Admin: username='admin', password='admin@123'")
+    print("Manager 1: username='dayamanager', password='manager123'")
+    print("Manager 2: username='vijaymanager', password='manager123'")
+    print("Employee 1: username='govi', password='employee123'")
+    print("Employee 2: username='nani', password='employee123'")
+    print("Employee 3: username='ramesh', password='employee123'")
+    print("Employee 4: username='tharun', password='employee123'")
 
 @cli.command("create-admin")
 def create_admin():
