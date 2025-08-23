@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 from flask.cli import FlaskGroup
 from app import create_app, db
@@ -86,14 +85,18 @@ def init_db():
     db.session.commit()
     
     # Create sample leave requests
-    employee1 = User.query.filter_by(username='employee1').first()
-    employee2 = User.query.filter_by(username='employee2').first()
+    employee1 = User.query.filter_by(username='govi').first()
+    employee2= User.query.filter_by(username='nani').first()
+    employee3= User.query.filter_by(username='ramesh').first()
+    employee4 = User.query.filter_by(username='tharun').first()
+
+
     
     sample_leaves = [
         (employee1.id, LeaveType.VACATION, date(2025, 9, 1), date(2025, 9, 5), 'Family vacation'),
-        (employee1.id, LeaveType.SICK, date(2025, 8, 15), date(2025, 8, 16), 'Medical appointment'),
-        (employee2.id, LeaveType.PERSONAL, date(2025, 8, 20), date(2025, 8, 20), 'Personal matters'),
-    ]
+        (employee2.id, LeaveType.SICK, date(2025, 8, 15), date(2025, 8, 16), 'Medical appointment'),
+        (employee3.id, LeaveType.PERSONAL, date(2025, 8, 20), date(2025, 8, 20), 'Personal matters'),
+        (employee4.id,LeaveType.PERSONAL,date(2025,8,27),date(2025,8,27),'My birthaday')    ]
     
     for emp_id, leave_type, start_date, end_date, reason in sample_leaves:
         leave_request = LeaveRequest(
